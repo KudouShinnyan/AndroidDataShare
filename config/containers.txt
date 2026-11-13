@@ -1,0 +1,6 @@
+# 容器包名 + 目标APP目录模板；包名和路径用 空格/逗号/分号 分隔
+# {pkg} = 目标应用包名，可能出现多次，扫描时全部替换
+# 目录可能在 /sdcard/Android/obb/容器APP包名/、/sdcard/Android/data/容器APP包名/ 或 /data/data/容器APP包名/ 下的某个目录
+# 容器包在任意用户装了才显示这一档
+# 默认内置元萝卜一行，别的容器另起一行
+top.bienvenido.saas.i18n /sdcard/Android/obb/top.bienvenido.saas.i18n/scopedStorage/{pkg}/Android/data/{pkg}/

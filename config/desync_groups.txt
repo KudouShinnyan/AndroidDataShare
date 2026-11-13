@@ -1,0 +1,4 @@
+# Known package groups whose update schedules do not stay in sync.
+# One line per game, two or more package names, separated by spaces / commas / semicolons.
+# Add a new line when a case is reported; the build normalises and bundles this file.
+com.gof.global com.gof.china

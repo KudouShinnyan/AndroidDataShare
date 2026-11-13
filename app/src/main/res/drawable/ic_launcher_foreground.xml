@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive icon 前景：0.75 缩放，保证圆形遮罩下人物完整 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:scaleX="0.75" android:scaleY="0.75"
+        android:pivotX="54" android:pivotY="54">
+        <path android:fillColor="#6D4C41"
+        android:pathData="M19,36 A9,9 0 1,0 37,36 A9,9 0 1,0 19,36 Z M20,28 Q13,26 9,31 Q6,36 9,41 Q10,44 12,43 Q10,38 13,34 Q17,30 20,30 Z"/>
+        <path android:fillColor="#FFE0BD"
+        android:pathData="M28,29 Q34,29 36,34 Q37,38 35,41 Q33,44 29,44 Q27,41 27,36 Q27,32 28,29 Z"/>
+        <path android:fillColor="#3E2723"
+        android:pathData="M30.8,37 A1.2,1.4 0 1,0 33.2,37 A1.2,1.4 0 1,0 30.8,37 Z"/>
+        <path android:fillColor="#FFAB91"
+        android:pathData="M28.5,40 A1.5,1.2 0 1,0 31.5,40 A1.5,1.2 0 1,0 28.5,40 Z"/>
+        <path android:fillColor="#FFE0BD"
+        android:pathData="M27,44 L30,44 L30,47 L27,47 Z"/>
+        <path android:fillColor="#D7CCC8"
+        android:pathData="M22,47 L34,47 Q36,47 36,49 L36,63 Q36,65 34,65 L22,65 Q20,65 20,63 L20,49 Q20,47 22,47 Z"/>
+        <path android:fillColor="#9E9E9E"
+        android:pathData="M21,65 L35,65 L36,73 Q36,75 34,75 L22,75 Q20,75 20,73 Z"/>
+        <path android:fillColor="#FFE0BD"
+        android:pathData="M24,75 L27,75 L27,84 L24,84 Z M29,75 L32,75 L32,84 L29,84 Z"/>
+        <path android:fillColor="#FFFFFF"
+        android:pathData="M25,47 L31,47 L28,51 Z"/>
+        <path android:fillColor="#E53935"
+        android:pathData="M24,49 L28,51 L24,53 Z M32,49 L28,51 L32,53 Z"/>
+        <path android:fillColor="#FFFFFF"
+        android:pathData="M35,49 L48,53 Q51,54 51,56 Q51,58 48,57 L36,55 Z"/>
+        <path android:fillColor="#FFFFFF"
+        android:pathData="M21,49 L20,63 Q20,66 17.5,66 Q15,66 15,63 L16,51 Z"/>
+        <path android:fillColor="#FFD54F"
+        android:pathData="M20,27 A2,2.5 0 1,0 24,27 A2,2.5 0 1,0 20,27 Z"/>
+        <path android:fillColor="#6D4C41"
+        android:pathData="M71,36 A9,9 0 1,0 89,36 A9,9 0 1,0 71,36 Z M88,28 Q95,26 99,31 Q102,36 99,41 Q98,44 96,43 Q98,38 95,34 Q91,30 88,30 Z"/>
+        <path android:fillColor="#FFE0BD"
+        android:pathData="M80,29 Q74,29 72,34 Q71,38 73,41 Q75,44 79,44 Q81,41 81,36 Q81,32 80,29 Z"/>
+        <path android:fillColor="#3E2723"
+        android:pathData="M74.8,37 A1.2,1.4 0 1,0 77.2,37 A1.2,1.4 0 1,0 74.8,37 Z"/>
+        <path android:fillColor="#FFAB91"
+        android:pathData="M76.5,40 A1.5,1.2 0 1,0 79.5,40 A1.5,1.2 0 1,0 76.5,40 Z"/>
+        <path android:fillColor="#FFE0BD"
+        android:pathData="M78,44 L81,44 L81,47 L78,47 Z"/>
+        <path android:fillColor="#D7CCC8"
+        android:pathData="M74,47 L86,47 Q88,47 88,49 L88,63 Q88,65 86,65 L74,65 Q72,65 72,63 L72,49 Q72,47 74,47 Z"/>
+        <path android:fillColor="#9E9E9E"
+        android:pathData="M73,65 L87,65 L88,73 Q88,75 86,75 L74,75 Q72,75 72,73 Z"/>
+        <path android:fillColor="#FFE0BD"
+        android:pathData="M76,75 L79,75 L79,84 L76,84 Z M81,75 L84,75 L84,84 L81,84 Z"/>
+        <path android:fillColor="#FFFFFF"
+        android:pathData="M77,47 L83,47 L80,51 Z"/>
+        <path android:fillColor="#E53935"
+        android:pathData="M76,49 L80,51 L76,53 Z M84,49 L80,51 L84,53 Z"/>
+        <path android:fillColor="#FFFFFF"
+        android:pathData="M73,49 L60,53 Q57,54 57,56 Q57,58 60,57 L72,55 Z"/>
+        <path android:fillColor="#FFFFFF"
+        android:pathData="M87,49 L88,63 Q88,66 90.5,66 Q93,66 93,63 L92,51 Z"/>
+        <path android:fillColor="#FFD54F"
+        android:pathData="M84,27 A2,2.5 0 1,0 88,27 A2,2.5 0 1,0 84,27 Z"/>
+        <path android:fillColor="#FFD54F"
+        android:pathData="M44,38 L54,38 Q56,38 56,40 L56,44 L64,44 Q66,44 66,46 L66,58 Q66,60 64,60 L44,60 Q42,60 42,58 L42,46 Q42,44 44,44 Z"/>
+        <path android:fillColor="#FFF8E1"
+        android:pathData="M44,47 L64,47 Q65,47 65,48.5 Q65,50 64,50 L44,50 Q43,50 43,48.5 Q43,47 44,47 Z"/>
+    </group>
+</vector>

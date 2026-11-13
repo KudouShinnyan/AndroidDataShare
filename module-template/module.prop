@@ -1,0 +1,6 @@
+id=AndroidDataShare
+name=AndroidDataShare boot restore
+version=v1.0
+versionCode=100
+author=KudouShinnyan
+description=Restores ACTIVE mount groups once at boot. The app owns configuration and version-change detection.

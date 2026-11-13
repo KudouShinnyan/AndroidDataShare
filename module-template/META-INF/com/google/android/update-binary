@@ -1,0 +1,16 @@
+#!/sbin/sh
+umask 022
+OUTFD=$2
+ZIPFILE=$3
+MODPATH=${MODPATH:-/data/adb/modules_update/AndroidDataShare}
+mkdir -p "$MODPATH" 2>/dev/null
+unzip -o "$ZIPFILE" 'module.prop' 'common.sh' 'engine.sh' 'service.sh' 'action.sh' 'uninstall.sh' 'config/*' -d "$MODPATH" >/dev/null 2>&1
+rm -rf "$MODPATH/META-INF" 2>/dev/null
+for f in "$MODPATH"/*.sh; do
+    [ -f "$f" ] && chmod 0755 "$f" 2>/dev/null
+done
+chmod 0644 "$MODPATH/config/"* 2>/dev/null
+ui_print() { printf 'ui_print %s\nui_print\n' "$1" > /proc/self/fd/"$OUTFD" 2>/dev/null; }
+ui_print "AndroidDataShare boot-restore module installed"
+ui_print "Mounts restore once at boot; configuration stays in the app"
+exit 0

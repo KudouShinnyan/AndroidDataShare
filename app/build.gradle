@@ -1,0 +1,147 @@
+plugins {
+    id "com.android.application"
+}
+
+def desyncSrc = file("$rootDir/config/desync_groups.txt")
+def syncSrc = file("$rootDir/config/sync_groups.txt")
+def containersSrc = file("$rootDir/config/containers.txt")
+def moduleSrc = file("$rootDir/module-template")
+def adsOut = file("$buildDir/generated/assets/ads")
+def desyncOut = file("$buildDir/generated/assets/desync")
+def desyncFile = new File(desyncOut, "desync_groups.txt")
+def syncFile = new File(desyncOut, "sync_groups.txt")
+def containersFile = new File(desyncOut, "containers.txt")
+
+def genDesyncTask = tasks.register("genDesync") {
+    inputs.file(desyncSrc)
+    inputs.file(syncSrc)
+    inputs.file(containersSrc)
+    outputs.file(desyncFile)
+    outputs.file(syncFile)
+    outputs.file(containersFile)
+    doLast {
+        def pkgPattern = ~/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$/
+        def normalise = { File src, String tag, Closure valid ->
+            def rows = new LinkedHashSet<String>()
+            if (src.isFile()) {
+                src.eachLine("UTF-8") { raw ->
+                    def line = raw.replace("\uFEFF", "").trim()
+                    if (!line || line.startsWith("#")) return
+                    def parts = line.split("[\\s,;]+").findAll { it } as List
+                    if (!valid(parts)) {
+                        logger.warn("${tag}: skipped invalid line: ${line}")
+                        return
+                    }
+                    rows.add(parts.join(" "))
+                }
+            } else {
+                logger.warn("${tag}: source missing, generating an empty list")
+            }
+            return rows
+        }
+        def packageRow = { List p -> p.size() >= 2 && p.every { it ==~ pkgPattern } }
+        def containerRow = { List p -> p.size() == 2 && (p[0] ==~ pkgPattern)
+                && p[1].startsWith("/") && p[1].contains("{pkg}") }
+        def pairKeys = { Set<String> rows ->
+            def out = new LinkedHashSet<String>()
+            rows.each { r ->
+                def p = r.split(" ") as List
+                for (int i = 0; i < p.size(); i++) {
+                    for (int j = i + 1; j < p.size(); j++) {
+                        out.add([p[i], p[j]].sort().join("#"))
+                    }
+                }
+            }
+            return out
+        }
+        desyncOut.mkdirs()
+        def desyncRows = normalise(desyncSrc, "desync", packageRow)
+        def syncRows = normalise(syncSrc, "sync", packageRow)
+        desyncFile.withWriter("UTF-8") { w -> desyncRows.each { w.writeLine(it) } }
+        syncFile.withWriter("UTF-8") { w -> syncRows.each { w.writeLine(it) } }
+        containersFile.withWriter("UTF-8") { w ->
+            normalise(containersSrc, "containers", containerRow).each { w.writeLine(it) }
+        }
+        def both = pairKeys(desyncRows).intersect(pairKeys(syncRows))
+        if (!both.isEmpty()) {
+            logger.warn("desync/sync: overlapping package pairs (desync takes priority): ${both.join(', ')}")
+        }
+    }
+}
+// module-template/ is the only source; engine.sh and the module zip are generated here.
+def genModuleAssetsTask = tasks.register("genModuleAssets") {
+    inputs.dir(moduleSrc)
+    outputs.dir(adsOut)
+    doLast {
+        adsOut.mkdirs()
+        new File(adsOut, "engine.sh").setText(
+                new File(moduleSrc, "engine.sh").getText("UTF-8"), "UTF-8")
+        def zos = new java.util.zip.ZipOutputStream(
+                new java.io.FileOutputStream(new File(adsOut, "module-template.zip")))
+        def files = []
+        moduleSrc.eachFileRecurse { f -> if (f.isFile()) { files << f } }
+        files.sort { it.path }.each { f ->
+            def rel = moduleSrc.toPath().relativize(f.toPath())
+                    .toString().replace(File.separator, "/")
+            zos.putNextEntry(new java.util.zip.ZipEntry(rel))
+            zos.write(f.bytes)
+            zos.closeEntry()
+        }
+        zos.close()
+    }
+}
+
+android {
+    namespace "io.github.kudoushinnyan.datashare"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "io.github.kudoushinnyan.datashare"
+        minSdk 26
+        targetSdk 36
+        versionCode 100
+        versionName "1.0"
+    }
+
+    androidResources {
+        noCompress += ["zip", "sh"]
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs += desyncOut.path
+            assets.srcDirs += adsOut.path
+        }
+    }
+}
+
+// Generated assets must exist before any variant merges them.
+tasks.matching {
+    it.name == "preBuild" || (it.name.startsWith("merge") && it.name.endsWith("Assets"))
+}.configureEach {
+    dependsOn(genDesyncTask, genModuleAssetsTask)
+}
+
+// Keep kotlin-stdlib out of the APK; lint's own toolchain still needs it.
+configurations.configureEach { cfg ->
+    def n = cfg.name.toLowerCase()
+    if (!n.contains("lint") && (n.endsWith("compileclasspath") || n.endsWith("runtimeclasspath"))) {
+        exclude group: 'org.jetbrains.kotlin'
+    }
+}
+
+dependencies {
+    implementation "dev.rikka.shizuku:api:13.1.5"
+    implementation "dev.rikka.shizuku:provider:13.1.5"
+}
