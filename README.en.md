@@ -2,7 +2,7 @@
 
 [简体中文](README.md) · [繁體中文](README.zh-Hant.md) · [English](README.en.md) · [日本語](README.ja.md)
 
-The primary app has already downloaded the asset pack. When you don't want every clone or other user to download it again, this app shares the data under Android/data/<package>/, saving the repeated downloads and several gigabytes.
+Once the primary app has downloaded its asset pack, the other clients of the same game — a different server (another package), a cross-user install, or a container clone — can share that one copy: no second download, or several GB less space.
 
 ## Requirements
 
