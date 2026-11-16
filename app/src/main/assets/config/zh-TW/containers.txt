@@ -1,0 +1,4 @@
+# 一行寫容器套件名 + 目標應用程式的資料路徑範本，{pkg} 會替換成目標套件的套件名
+# 可寫內建儲存的掛載路徑，或圖短寫 sdcard；短寫法會依目標使用者正規化到內建儲存的實際路徑
+# # 開頭是註解，不生效；下面是元蘿蔔的例子，照著加別的即可：
+# top.bienvenido.saas.i18n /sdcard/Android/obb/top.bienvenido.saas.i18n/scopedStorage/{pkg}/Android/data/{pkg}/

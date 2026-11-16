@@ -107,6 +107,7 @@
     <string name="result_cleared">目标端已清空，配置保留；需要时点右侧动作按原配置重放。</string>
     <string name="action_reshare">重新共享</string>
     <string name="status_line_active">当前状态：共享中</string>
+    <string name="status_line_failed">当前状态：未生效</string>
     <string name="status_line_paused">当前状态：已暂停（文件保留）</string>
     <string name="status_line_terminated">当前状态：已终止（目标端已清空）</string>
     <string name="action_terminate">终止</string>
@@ -126,7 +127,7 @@
     <string name="warn_desync_accept">仍要共享</string>
     <string name="warn_mount_risk_cross_user">目标端与主应用不在同一用户，跨用户挂载可能不会生效：即使命令执行成功，目标应用也可能因各用户独立的存储视图读不到挂载内容；是否生效以目标应用身份实读为准。</string>
     <string name="warn_mount_short_title">挂载可能读不到</string>
-    <string name="warn_mount_short_body">是否生效以目标应用身份实读为准，命令执行成功不代表目标应用能读到；未通过时本组标「未生效」，不补齐、不自动换档，是否重试或改用别的方式由你决定。</string>
+    <string name="warn_mount_short_body">挂载生效后，目录内新增、删除、替换会自动跟随。若读不到，也可看看所用 root 方案是否提供全局挂载命名空间一类的设置；实在不行就改试硬链接或复制。</string>
     <string name="warn_scope_whole_title">整个包名目录</string>
     <string name="warn_scope_whole_body">生效后目录内新增、删除、替换会自动跟随，无需补齐、无需重建；但挂载仅在部分系统生效，有可能挂上了却读不到，是否生效仍以目标应用身份实读为准。此档与同一目标端的其他组互斥。</string>
     <string name="extra_mode_link">硬链接补齐（推荐）</string>
@@ -136,7 +137,6 @@
     <string name="extra_pick_hint">硬链接：只占一份空间。复制：独立副本，多占一份空间。主应用更新后都不会自动跟过来，点重新共享即可重建。</string>
     <string name="perm_request">请求权限</string>
     <string name="perm_granted">√ 已授权</string>
-    <string name="perm_granted_module">√ 已授权（开机恢复模块可用）</string>
     <string name="perm_locked_hint">请先授予执行权限。在此之前，新建、编辑与保存共享组、生成模块均不可用，避免配置了却无法生效。</string>
     <string name="perm_restored_locked">配置已恢复。授权后即可保存并生效；模块按钮也只在授权后出现。</string>
     <string name="perm_request_denied">未获得权限。请检查 Shizuku / Sui 或 root 管理器后重试。</string>
@@ -159,7 +159,7 @@
     <string name="label_target_kind">目标类型</string>
     <string name="mode_hardlink_rec">硬链接（荐）</string>
     <string name="mode_hardlink_hint">看起来两边都各有一份真实文件、各自占着空间，其实指向同一份数据，只占用一份容量；两端目录项完全平等，没有主次之分。主应用更新后按需点「重建」即可再次省容量，不点也能继续用。</string>
-    <string name="mode_mount_hint">挂载生效后，目录内新增、删除、替换会自动跟随；是否生效以目标应用身份实读为准，不同系统可能读不到。</string>
+    <string name="mode_mount_hint">挂载生效后，目录内新增、删除、替换会自动跟随；是否生效以目标应用身份实读为准，读不到时也可看看所用 root 方案是否提供全局挂载命名空间一类的设置；实在不行就改试硬链接或复制。</string>
     <string name="mode_copy_hint">复制仅限兜底用：会多占用一份容量，仅在硬链接与挂载都未能生效、又不想让目标应用重新下载资源时选用。两端各留独立副本，不跟随更新。</string>
     <string name="progress_title">正在建立共享</string>
     <string name="progress_count">已执行 %1$s 条命令</string>
@@ -193,8 +193,6 @@
     <string name="warn_cross_user_title">跨用户挂载可能不会生效</string>
     <string name="save_confirm_title">保存共享组</string>
     <string name="save_clear_line">新建组会先清空目标应用的数据目录，再按「%1$s」建立共享。</string>
-    <string name="progress_done_title">完成</string>
-    <string name="progress_done_ok">返回主界面</string>
     <string name="save_edit_line">保存后会先强制停止目标应用，再按本次改动更新本组共享；不会清空目标应用已有数据，配置保留，其他共享组不受影响。</string>
     <string name="err_target_same_body">目标应用与主应用是同一个应用、同一个用户，等于把一份数据共享给自己。请选择另一个客户端，或换一个用户后再添加。</string>
     <string name="err_target_dup_body">这个应用（同一用户）已在别的共享组里（主应用或目标应用），或在本组内重复。同一份数据只能由一个共享组接管，请在已有组里继续添加目标应用。</string>
@@ -204,11 +202,19 @@
     <string name="delete_clear_check">把目标应用的目录清空</string>
     <string name="delete_mount_body">删除「%1$s」？目标应用的目录会一并清空。</string>
     <string name="warn_shell_title">当前后端可能无法完成共享</string>
-    <string name="warn_shell_body">当前是纯 Shizuku（shell 权限）。/data/media/用户/ 下的应用数据目录进不去，本应用会改试 /storage/emulated/0/。那里通常只有「复制」可用：模拟 SD 卡不支持硬链接和挂载，改成用户 0 以外的用户也用不了。建议换回「复制」，或改用 root / Sui；失败会逐条列出。</string>
-    <string name="progress_log_saved">执行完成。确定后滚动记录无法回看，完整内容已保存到 Download/AndroidDataShare/run.log，可在文件管理器中查看；每次执行会覆盖，只保留最近一次。</string>
+    <string name="warn_shell_body">当前是纯 Shizuku（shell 权限）。/data/media/用户/ 下的应用数据目录进不去，本应用会改试当前设备主用户的公共存储路径。那里通常只有「复制」可用：公共存储视图不支持硬链接和挂载，改成用户 0 以外的用户也用不了。建议换回「复制」，或改用 root / Sui；失败会逐条列出。</string>
+    <string name="progress_log_saved">执行完成。完整内容已保存到 Download/AndroidDataShare/run.log，可在文件管理器中查看；每次执行会覆盖，只保留最近一次。</string>
     <string name="label_scope_link">硬链接范围</string>
     <string name="label_scope_copy">复制范围</string>
     <string name="scope_all_files">全部文件</string>
     <string name="scope_pick_items">指定目录或文件</string>
     <string name="scope_pick_hint">可勾选目录或单个文件；勾中的目录会在执行时展开成其中的文件。</string>
+    <string name="hardlink_unsupported_hint">这个系统好像不支持或限制了硬链接，也许只能改用复制了。</string>
+    <string name="progress_pause">暂停</string>
+    <string name="progress_resume">继续</string>
+    <string name="progress_cancel">取消执行</string>
+    <string name="progress_cancel_body">确认后会停止执行，并清空目标目录里已生成的内容，无法撤销。</string>
+    <string name="progress_cancelled">已停止，目标目录里已生成的内容已清空。</string>
+    <string name="progress_close">关闭</string>
+    <string name="progress_ctrl_failed">暂停或继续的指令没发出去，执行可能会继续跑。</string>
 </resources>

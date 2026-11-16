@@ -1,4 +1,3 @@
-# Known package groups whose update schedules do not stay in sync.
-# One line per game, two or more package names, separated by spaces / commas / semicolons.
-# Add a new line when a case is reported; the build normalises and bundles this file.
+# 一行写需彼此避开的一组包名，空格或逗号分隔
+# 避坑优先于可共用；分歧以内置为准
 com.gof.global com.gof.china

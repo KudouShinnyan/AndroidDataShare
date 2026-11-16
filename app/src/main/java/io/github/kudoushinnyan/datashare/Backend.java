@@ -30,6 +30,10 @@ interface Backend {
 
     Result exec(String script);
 
+    default Result execRaw(String shell) {
+        return exec(shell);
+    }
+
     interface StepSink {
         void onStep(String line);
     }

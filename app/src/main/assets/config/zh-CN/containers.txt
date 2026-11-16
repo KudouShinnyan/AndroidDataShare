@@ -1,0 +1,4 @@
+# 一行写容器包名 + 目标应用的数据路径模板，{pkg} 会替换成目标应用包名
+# 写内置存储的挂载路径、或图短写 sdcard，都行；短写法会按目标用户归一到内置存储的实际路径
+# # 开头是注释，不生效；下面是元萝卜的例子，照着加别的即可：
+# top.bienvenido.saas.i18n /sdcard/Android/obb/top.bienvenido.saas.i18n/scopedStorage/{pkg}/Android/data/{pkg}/

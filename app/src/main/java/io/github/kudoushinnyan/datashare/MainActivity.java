@@ -163,9 +163,7 @@ public class MainActivity extends Activity {
 
         boolean granted = Perm.granted(sel);
         Button request = new Button(this);
-        request.setText(granted
-                ? (Backends.moduleInstalled() ? R.string.perm_granted_module : R.string.perm_granted)
-                : R.string.perm_request);
+        request.setText(granted ? R.string.perm_granted : R.string.perm_request);
         request.setEnabled(!granted);
         request.setOnClickListener(v -> requestPermission());
         box.addView(request, Util.fullWidth());
@@ -328,14 +326,14 @@ public class MainActivity extends Activity {
         if (!g.enabled) {
             return getString(R.string.status_row_disabled);
         }
-        if (g.isMount()) {
-            if (Model.STATUS_PAUSED.equals(g.status)) {
-                return getString(R.string.status_line_paused);
-            }
-            if (Model.STATUS_TERMINATED.equals(g.status)) {
-                return getString(R.string.status_line_terminated);
-            }
-            return getString(R.string.status_line_active);
+        if (Model.STATUS_PAUSED.equals(g.status)) {
+            return getString(R.string.status_line_paused);
+        }
+        if (Model.STATUS_TERMINATED.equals(g.status)) {
+            return getString(R.string.status_line_terminated);
+        }
+        if (!g.applied) {
+            return getString(R.string.status_line_failed);
         }
         if (Model.MODE_HARDLINK.equals(g.mode)) {
             if (g.versionFlag == 1) {
@@ -379,26 +377,19 @@ public class MainActivity extends Activity {
     }
 
     private void runGroup(Model.Group g, String op, int resultKey) {
-        final Progress.Handle h = Progress.show(this, getString(R.string.progress_title));
-        final Backend.StepSink sink = h::step;
+        boolean controllable = Model.MODE_HARDLINK.equals(g.mode) && g.enabled
+                && !"clear".equals(op);
+        final Progress.Handle h = Progress.show(this, getString(R.string.progress_title),
+                controllable, this::render);
         new Thread(() -> {
-            Backend.Result r = Actions.op(this, g.id, op, sink);
-            Util.ui(this, () -> {
-                int okKey = resultKey == 0 ? R.string.msg_applied : resultKey;
-                String msg = r.ok ? getString(okKey) : getString(R.string.result_failed);
-                h.done(r.ok, msg);
-                doneDialog(msg);
-            });
+            Backend.Result r = Actions.op(this, g.id, op, h::step);
+            Actions.markApplied(this, g.id, r, "clear".equals(op));
+            int okKey = resultKey == 0 ? R.string.msg_applied : resultKey;
+            String msg = "CANCELLED".equals(r.code) ? getString(R.string.progress_cancelled)
+                    : (r.ok ? getString(okKey) : getString(R.string.result_failed));
+            h.finish(msg);
+            Progress.saveLog(h.log());
         }).start();
-    }
-
-    private void doneDialog(String msg) {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.progress_done_title)
-                .setMessage(msg)
-                .setPositiveButton(R.string.progress_ok, (d, w) -> render())
-                .setCancelable(false)
-                .show();
     }
 
     private String currentBackendLabel() {
@@ -498,18 +489,18 @@ public class MainActivity extends Activity {
         Session.markModeChanged(gid);
         Session.get().groups.remove(index);
         Session.save(this);
-        final Progress.Handle h = Progress.show(this, getString(R.string.progress_title));
+        final Progress.Handle h = Progress.show(this, getString(R.string.progress_title),
+                false, this::render);
         new Thread(() -> {
             Backend.Result r = Actions.submitLive(this, clearRules, h::step);
-            Util.ui(MainActivity.this, () -> {
-                String msg = r.ok
+            String msg = "CANCELLED".equals(r.code) ? getString(R.string.progress_cancelled)
+                    : (r.ok
                         ? ("PARTIAL".equals(r.code)
                             ? getString(R.string.msg_rule_partial, r.message)
                             : getString(R.string.msg_applied))
-                        : getString(R.string.msg_failed, r.code + " " + r.message);
-                h.done(r.ok, msg);
-                doneDialog(msg);
-            });
+                        : getString(R.string.msg_failed, r.code + " " + r.message));
+            h.finish(msg);
+            Progress.saveLog(h.log());
         }).start();
     }
 

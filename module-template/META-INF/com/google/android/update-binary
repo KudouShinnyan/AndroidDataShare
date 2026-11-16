@@ -4,7 +4,7 @@ OUTFD=$2
 ZIPFILE=$3
 MODPATH=${MODPATH:-/data/adb/modules_update/AndroidDataShare}
 mkdir -p "$MODPATH" 2>/dev/null
-unzip -o "$ZIPFILE" 'module.prop' 'common.sh' 'engine.sh' 'service.sh' 'action.sh' 'uninstall.sh' 'config/*' -d "$MODPATH" >/dev/null 2>&1
+unzip -o "$ZIPFILE" 'module.prop' 'common.sh' 'engine.sh' 'service.sh' 'uninstall.sh' 'config/*' -d "$MODPATH" >/dev/null 2>&1
 rm -rf "$MODPATH/META-INF" 2>/dev/null
 for f in "$MODPATH"/*.sh; do
     [ -f "$f" ] && chmod 0755 "$f" 2>/dev/null

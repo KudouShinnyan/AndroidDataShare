@@ -1,0 +1,4 @@
+# One line per group of package names to keep apart, separated by spaces or commas.
+# Avoiding conflicts takes priority over sharing; if they disagree, the built-in one wins.
+# Example (uncomment and edit):
+# com.example.x com.example.y

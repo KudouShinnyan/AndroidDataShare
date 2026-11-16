@@ -1,0 +1,4 @@
+# コンテナのパッケージ名と対象アプリのデータパスのテンプレートを1行に書きます。{pkg} は対象のパッケージ名に置き換わります。
+# 内部ストレージのマウントパス、または短い "sdcard" 表記が使えます。短い表記はそのユーザーの実際のパスに解決されます。
+# # で始まる行はコメントで反映されません。下は例です。同じように追記してください：
+# top.bienvenido.saas.i18n /sdcard/Android/obb/top.bienvenido.saas.i18n/scopedStorage/{pkg}/Android/data/{pkg}/

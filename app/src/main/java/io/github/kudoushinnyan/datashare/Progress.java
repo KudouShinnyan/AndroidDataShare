@@ -4,19 +4,19 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 final class Progress {
 
     private static final AtomicBoolean BUSY = new AtomicBoolean();
-    private static WeakReference<View> attachedBox;
 
     static boolean busy() {
         return BUSY.get();
@@ -25,7 +25,7 @@ final class Progress {
     interface Handle {
         void step(String line);
 
-        void done(boolean ok, String message);
+        void finish(String message);
 
         String log();
     }
@@ -33,28 +33,18 @@ final class Progress {
     private Progress() {
     }
 
-    static Handle show(Activity a, String title) {
-        return open(a, null, title);
+    private static LinearLayout.LayoutParams bar() {
+        return new LinearLayout.LayoutParams(0,
+                LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
     }
 
-    static Handle attach(Activity a, LinearLayout host, String title) {
-        return open(a, host, title);
-    }
-
-    private static Handle open(Activity a, LinearLayout host, String title) {
+    static Handle show(Activity a, String title, boolean controllable, Runnable onClose) {
         Util.keepAwake(a, true);
         BUSY.set(true);
         LinearLayout box = new LinearLayout(a);
         box.setOrientation(LinearLayout.VERTICAL);
-        int p = Util.dp(a, host == null ? 16 : 12);
+        int p = Util.dp(a, 16);
         box.setPadding(p, p, p, p);
-
-        if (host != null) {
-            TextView head = new TextView(a);
-            head.setText(title);
-            head.setTextSize(15f);
-            box.addView(head, Util.fullWidth());
-        }
 
         TextView count = new TextView(a);
         count.setText(R.string.progress_wait);
@@ -71,35 +61,72 @@ final class Progress {
         ListView list = new ListView(a);
         list.setAdapter(adapter);
         box.addView(list, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                Util.dp(a, host == null ? 220 : 200)));
+                LinearLayout.LayoutParams.MATCH_PARENT, Util.dp(a, 220)));
 
-        AlertDialog dialog = null;
-        if (host == null) {
-            dialog = new AlertDialog.Builder(a)
-                    .setTitle(title)
-                    .setView(box)
-                    .setCancelable(false)
-                    .create();
-            dialog.show();
-        } else {
-            View old = attachedBox == null ? null : attachedBox.get();
-            if (old != null && old.getParent() == host) {
-                host.removeView(old);
-            }
-            host.addView(box, Util.fullWidth());
-            attachedBox = new WeakReference<>(box);
+        Button pause = new Button(a);
+        pause.setText(R.string.progress_pause);
+        Button cancel = new Button(a);
+        cancel.setText(R.string.progress_cancel);
+        Button close = new Button(a);
+        close.setText(R.string.progress_close);
+        close.setVisibility(View.GONE);
+        LinearLayout buttons = new LinearLayout(a);
+        buttons.setOrientation(LinearLayout.HORIZONTAL);
+        if (controllable) {
+            buttons.addView(pause, bar());
+            buttons.addView(cancel, bar());
         }
-        final AlertDialog d = dialog;
-        final StringBuffer log = host == null ? null : new StringBuffer();
+        buttons.addView(close, bar());
+        box.addView(buttons, Util.fullWidth());
 
-        AtomicInteger n = new AtomicInteger();
-        return new Handle() {
+        AlertDialog dialog = new AlertDialog.Builder(a)
+                .setTitle(title)
+                .setView(box)
+                .setCancelable(false)
+                .create();
+        dialog.show();
+
+        final StringBuffer log = new StringBuffer();
+        final AtomicBoolean paused = new AtomicBoolean(false);
+        final AtomicInteger n = new AtomicInteger();
+        final Handle[] ref = new Handle[1];
+
+        final Consumer<String> send = action -> new Thread(() -> {
+            Backend.Result r = Backends.ctrl(action);
+            if ((!r.ok || !r.data.contains("ADS_CTRL_OK")) && ref[0] != null) {
+                ref[0].step(a.getString(R.string.progress_ctrl_failed));
+            }
+        }).start();
+
+        final Runnable askCancel = () -> new AlertDialog.Builder(a)
+                .setTitle(R.string.progress_cancel)
+                .setMessage(R.string.progress_cancel_body)
+                .setPositiveButton(R.string.confirm_accept, (d, w) -> send.accept("cancel"))
+                .setNegativeButton(R.string.action_cancel, null)
+                .show();
+
+        close.setOnClickListener(v -> {
+            Util.keepAwake(a, false);
+            BUSY.set(false);
+            dialog.dismiss();
+            if (onClose != null) {
+                onClose.run();
+            }
+        });
+
+        pause.setOnClickListener(v -> {
+            boolean nowPaused = !paused.get();
+            paused.set(nowPaused);
+            pause.setText(nowPaused ? R.string.progress_resume : R.string.progress_pause);
+            send.accept(nowPaused ? "pause" : "continue");
+        });
+
+        cancel.setOnClickListener(v -> askCancel.run());
+
+        Handle h = new Handle() {
             @Override
             public void step(String line) {
-                if (log != null) {
-                    log.append(line).append('\n');
-                }
+                log.append(line).append('\n');
                 Util.ui(a, () -> {
                     count.setText(a.getString(R.string.progress_count,
                             String.valueOf(n.incrementAndGet())));
@@ -110,25 +137,30 @@ final class Progress {
             }
 
             @Override
-            public String log() {
-                return log == null ? "" : log.toString();
+            public void finish(String message) {
+                String saved = a.getString(R.string.progress_log_saved);
+                log.append(message).append('\n').append(saved).append('\n');
+                Util.ui(a, () -> {
+                    Util.keepAwake(a, false);
+                    count.setText(message);
+                    hint.setText(saved);
+                    lines.add(message);
+                    lines.add(saved);
+                    adapter.notifyDataSetChanged();
+                    list.setSelection(lines.size() - 1);
+                    pause.setVisibility(View.GONE);
+                    cancel.setVisibility(View.GONE);
+                    close.setVisibility(View.VISIBLE);
+                });
             }
 
             @Override
-            public void done(boolean ok, String message) {
-                Util.ui(a, () -> {
-                    Util.keepAwake(a, false);
-                    BUSY.set(false);
-                    if (d == null) {
-                        count.setText(message);
-                        hint.setText(a.getString(ok
-                                ? R.string.msg_applied : R.string.result_failed));
-                    } else {
-                        d.dismiss();
-                    }
-                });
+            public String log() {
+                return log.toString();
             }
         };
+        ref[0] = h;
+        return h;
     }
 
     static boolean saveLog(String text) {

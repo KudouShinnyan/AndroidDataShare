@@ -71,6 +71,7 @@ final class Model {
         final List<String> dstVersions = new ArrayList<>();
         String sentinel = "";
         int versionFlag = 0;
+        boolean applied = true;
 
         boolean hasWhole() {
             return isMount() ? mountDirs.contains(WHOLE) : dirs.contains(WHOLE);
@@ -109,6 +110,7 @@ final class Model {
                     .append("\",\"dst_versions\":\"").append(String.join(",", g.dstVersions))
                     .append("\",\"sentinel\":\"").append(g.sentinel)
                     .append("\",\"version_flag\":").append(g.versionFlag)
+                    .append(",\"applied\":").append(g.applied ? 1 : 0)
                     .append(",\"extra_mode\":\"").append(g.extraMode)
                     .append("\",\"hints_dismissed\":").append(g.hintsDismissed ? 1 : 0)
                     .append(",\"targets\":[\n");
@@ -163,6 +165,7 @@ final class Model {
                 g.srcVersion = o.optString("src_version", "");
                 g.sentinel = o.optString("sentinel", "");
                 g.versionFlag = o.optInt("version_flag", 0);
+                g.applied = o.optInt("applied", 1) != 0;
                 g.extraMode = o.optString("extra_mode", MODE_HARDLINK);
                 g.hintsDismissed = o.optInt("hints_dismissed", 0) != 0;
                 g.primary.user = o.optString("src_user", "0");

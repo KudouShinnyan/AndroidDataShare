@@ -107,6 +107,7 @@
     <string name="result_cleared">目標端已清空，設定保留；需要時點右側動作按原設定重放。</string>
     <string name="action_reshare">重新共享</string>
     <string name="status_line_active">目前狀態：共享中</string>
+    <string name="status_line_failed">目前狀態：未生效</string>
     <string name="status_line_paused">目前狀態：已暫停（檔案保留）</string>
     <string name="status_line_terminated">目前狀態：已終止（目標端已清空）</string>
     <string name="action_terminate">終止</string>
@@ -126,7 +127,7 @@
     <string name="warn_desync_accept">仍要共享</string>
     <string name="warn_mount_risk_cross_user">目標端與主應用不在同一使用者，跨使用者掛載可能不會生效：即使指令執行成功，目標應用也可能因各使用者獨立的儲存檢視讀不到掛載內容；是否生效以目標應用身分實讀為準。</string>
     <string name="warn_mount_short_title">掛載可能讀不到</string>
-    <string name="warn_mount_short_body">是否生效以目標應用程式身份實讀為準，命令執行成功不代表目標應用程式能讀到；未通過時本群組標「未生效」，不補齊、不自動換檔，是否重試或改用別的方式由你決定。</string>
+    <string name="warn_mount_short_body">掛載生效後，目錄內新增、刪除、取代會自動跟隨。若讀不到，也可看看所用 root 方案是否提供全域掛載命名空間一類的設定；實在不行就改試硬連結或複製。</string>
     <string name="warn_scope_whole_title">整個套件目錄</string>
     <string name="warn_scope_whole_body">生效後目錄內新增、刪除、替換會自動跟隨，無需補齊、無需重建；但掛載僅在部分系統生效，有可能掛上了卻讀不到，是否生效仍以目標應用身分實讀為準。此檔與同一目標端的其他組互斥。</string>
     <string name="extra_mode_link">硬連結補齊（推薦）</string>
@@ -136,7 +137,6 @@
     <string name="extra_pick_hint">硬連結：只佔一份空間。複製：獨立副本，多佔一份空間。主應用程式更新後都不會自動跟過來，點重新共享即可重建。</string>
     <string name="perm_request">要求權限</string>
     <string name="perm_granted">√ 已授權</string>
-    <string name="perm_granted_module">√ 已授權（開機恢復模組可用）</string>
     <string name="perm_locked_hint">請先授予執行權限。在此之前，新增、編輯與儲存共享群組、產生模組均不可用，避免設定了卻無法生效。</string>
     <string name="perm_restored_locked">設定已還原。授權後即可儲存並生效；模組按鈕也只在授權後出現。</string>
     <string name="perm_request_denied">未獲得權限。請檢查 Shizuku / Sui 或 root 管理器後重試。</string>
@@ -159,7 +159,7 @@
     <string name="label_target_kind">目標類型</string>
     <string name="mode_hardlink_rec">硬連結（推薦）</string>
     <string name="mode_hardlink_hint">看起來兩邊都各有一份真實檔案、各自佔著空間，其實指向同一份資料，只佔用一份容量；兩端目錄項完全平等，沒有主次之分。主應用程式更新後按需點「重建」即可再次節省容量，不操作也能繼續用。</string>
-    <string name="mode_mount_hint">掛載生效後，目錄內新增、刪除、取代會自動跟隨；是否生效以目標應用程式身分實讀為準，不同系統可能讀不到。</string>
+    <string name="mode_mount_hint">掛載生效後，目錄內新增、刪除、取代會自動跟隨；是否生效以目標應用程式身分實讀為準，讀不到時也可看看所用 root 方案是否提供全域掛載命名空間一類的設定；實在不行就改試硬連結或複製。</string>
     <string name="mode_copy_hint">複製僅限兜底用：會多佔用一份容量，僅在硬連結與掛載都未能生效、又不想讓目標應用程式重新下載資源時選用。兩端各留獨立副本，不跟隨更新。</string>
     <string name="progress_title">正在建立共享</string>
     <string name="progress_count">已執行 %1$s 個指令</string>
@@ -193,8 +193,6 @@
     <string name="warn_cross_user_title">跨使用者掛載可能不會生效</string>
     <string name="save_confirm_title">儲存共享群組</string>
     <string name="save_clear_line">新建組會先清空目標應用程式的資料目錄，再按「%1$s」建立共享。</string>
-    <string name="progress_done_title">完成</string>
-    <string name="progress_done_ok">返回主介面</string>
     <string name="save_edit_line">儲存後會先強制停止目標應用程式，再依本次變更更新本組共享；不會清空目標應用程式既有資料，設定保留，其他共享組不受影響。</string>
     <string name="err_target_same_body">目標應用程式與主應用程式是同一個應用、同一個使用者，等於把一份資料共享給自己。請改用另一個客戶端，或切換到其他使用者後再新增。</string>
     <string name="err_target_dup_body">這個應用（同一使用者）已在別的共享組裡（主應用程式或目標），或在本組內重複。同一份資料只能由一個共享組接管，請在既有組裡繼續新增目標應用程式。</string>
@@ -204,11 +202,19 @@
     <string name="delete_clear_check">把目標應用程式的目錄清空</string>
     <string name="delete_mount_body">刪除「%1$s」？目標應用程式的目錄會一併清空。</string>
     <string name="warn_shell_title">目前後端可能無法完成共享</string>
-    <string name="warn_shell_body">目前是純 Shizuku（shell 權限）。/data/media/用戶/ 下的應用程式資料目錄進不去，本應用程式會改試 /storage/emulated/0/。那裡通常只有「複製」可用：模擬 SD 卡不支援硬連結與掛載，改成使用者 0 以外也用不了。建議換回「複製」，或改用 root / Sui；失敗會逐條列出。</string>
-    <string name="progress_log_saved">執行完成。確定後滾動記錄無法回看，完整內容已儲存到 Download/AndroidDataShare/run.log，可在檔案管理員中查看；每次執行會覆蓋，只保留最近一次。</string>
+    <string name="warn_shell_body">目前是純 Shizuku（shell 權限）。/data/media/用戶/ 下的應用程式資料目錄進不去，本應用程式會改試目前裝置主使用者的公共儲存路徑。那裡通常只有「複製」可用：公共儲存檢視不支援硬連結與掛載，改成使用者 0 以外也用不了。建議換回「複製」，或改用 root / Sui；失敗會逐條列出。</string>
+    <string name="progress_log_saved">執行完成。完整內容已儲存到 Download/AndroidDataShare/run.log，可在檔案管理員中查看；每次執行會覆蓋，只保留最近一次。</string>
     <string name="label_scope_link">硬連結範圍</string>
     <string name="label_scope_copy">複製範圍</string>
     <string name="scope_all_files">全部檔案</string>
     <string name="scope_pick_items">指定目錄或檔案</string>
     <string name="scope_pick_hint">可勾選目錄或單一檔案；勾中的目錄會在執行時展開成其中的檔案。</string>
+    <string name="hardlink_unsupported_hint">這個系統好像不支援或限制了硬連結，也許只能改用複製了。</string>
+    <string name="progress_pause">暫停</string>
+    <string name="progress_resume">繼續</string>
+    <string name="progress_cancel">取消執行</string>
+    <string name="progress_cancel_body">確認後會停止執行，並清空目標目錄裡已產生的內容，無法復原。</string>
+    <string name="progress_cancelled">已停止，目標目錄裡已產生的內容已清空。</string>
+    <string name="progress_close">關閉</string>
+    <string name="progress_ctrl_failed">暫停或繼續的指令沒發出去，執行可能會繼續跑。</string>
 </resources>

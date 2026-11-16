@@ -1,0 +1,4 @@
+# One line per container: package name + target app data path template; {pkg} is replaced with the target package name.
+# Use a real internal-storage mount path, or the short "sdcard" form; the short form is resolved to the actual path for that user.
+# Lines starting with # are comments and are ignored. Example below; add your own the same way:
+# top.bienvenido.saas.i18n /sdcard/Android/obb/top.bienvenido.saas.i18n/scopedStorage/{pkg}/Android/data/{pkg}/

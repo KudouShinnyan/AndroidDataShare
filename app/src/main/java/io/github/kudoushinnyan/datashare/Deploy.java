@@ -91,6 +91,9 @@ final class Deploy {
         String clear = clearRules == null ? "" : clearRules.trim();
         StringBuilder sh = new StringBuilder();
         sh.append(sink == null ? "ADS_PROGRESS=0\n" : "ADS_PROGRESS=1\n");
+        sh.append("engine_ctrl clear\n");
+        sh.append("ads_precheck_links ")
+                .append(Engine.heredoc("ADS_PRECHECK", applyRules.trim())).append('\n');
         sh.append("ads_step phase \"force-stop targets\"\n");
         sh.append(forceStopLines(applyRules));
         if (!old.isEmpty()) {
@@ -121,6 +124,9 @@ final class Deploy {
         } catch (Exception e) {
             return Backend.Result.fail("E_IO", e.toString());
         }
+        if (r.ok && r.data.contains("ADS_CANCELLED")) {
+            return new Backend.Result(true, "CANCELLED", "", r.data);
+        }
         if (r.ok) {
             for (String line : r.data.split("\n")) {
                 if (line.startsWith("ADS_RULE_FAIL|")) {
@@ -143,17 +149,22 @@ final class Deploy {
     }
 
     static Backend.Result action(String op, String gid, String rules, Backend.StepSink sink) {
+        boolean rebuild = "reapply".equals(op) || "restore".equals(op)
+                || "rebuild".equals(op) || "resync".equals(op);
         String sh = (sink == null ? "ADS_PROGRESS=0\n" : "ADS_PROGRESS=1\n")
+                + "engine_ctrl clear\n"
+                + (rebuild ? "ads_precheck_links "
+                        + Engine.heredoc("ADS_PRECHECK", rules.trim()) + "\n" : "")
                 + "ads_step phase \"force-stop targets\"\n"
                 + forceStopLines(rules)
                 + "ads_step phase \"run " + op + "\"\n"
                 + "engine_action " + op + " " + gid + " "
                 + Engine.heredoc("ADS_RULES", rules.trim()) + "\n"
                 + "ads_step done \"action finished\"\n";
-        if (sink == null) {
-            return Backends.current().exec(sh);
-        }
-        return Backends.current().execLive(sh, sink);
+        Backend.Result r = sink == null ? Backends.current().exec(sh)
+                : Backends.current().execLive(sh, sink);
+        return r.ok && r.data.contains("ADS_CANCELLED")
+                ? new Backend.Result(true, "CANCELLED", "", r.data) : r;
     }
 
     static Backend.Result versions(String user, String pkg, String sentinel) {

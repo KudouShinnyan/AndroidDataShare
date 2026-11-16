@@ -1,0 +1,4 @@
+# One line per group of package names that can share the same game data, separated by spaces or commas.
+# The built-in list is read too; this file only supplements it. If they disagree, the built-in one wins.
+# Example (uncomment and edit):
+# com.example.a com.example.b

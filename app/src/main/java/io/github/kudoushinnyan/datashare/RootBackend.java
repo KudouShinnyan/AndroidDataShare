@@ -28,6 +28,11 @@ final class RootBackend implements Backend {
     }
 
     @Override
+    public Result execRaw(String shell) {
+        return run(shell, null);
+    }
+
+    @Override
     public Result execLive(String script, StepSink sink) {
         return run(Engine.script(ctx, script), sink);
     }

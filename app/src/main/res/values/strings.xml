@@ -107,6 +107,7 @@
     <string name="result_cleared">Target side cleared; configuration is kept. Tap the right action to replay it when ready.</string>
     <string name="action_reshare">Re-share</string>
     <string name="status_line_active">Current state: Sharing</string>
+    <string name="status_line_failed">Current state: Not applied</string>
     <string name="status_line_paused">Current state: Paused (files kept)</string>
     <string name="status_line_terminated">Current state: Terminated (target side cleared)</string>
     <string name="action_terminate">Terminate</string>
@@ -126,7 +127,7 @@
     <string name="warn_desync_accept">Share anyway</string>
     <string name="warn_mount_risk_cross_user">The target is in a different user from the primary app. A cross-user mount may not take effect: even if the command succeeds, the target app may be unable to read it because each user has an independent storage view. Whether it works is confirmed by reading as the target app.</string>
     <string name="warn_mount_short_title">Mount may be unreadable</string>
-    <string name="warn_mount_short_body">Whether it works is decided by reading a file as the target app; a successful command does not mean the target app can read it. If that fails the group is marked not effective, with no partial content and no automatic method change. Retrying or choosing another method is up to you.</string>
+    <string name="warn_mount_short_body">Once Mount is working, files added, deleted or replaced inside the directory are followed automatically. If the app cannot see them, check whether your root setup offers a global mount namespace option. If that does not help, try Hard link or Copy instead.</string>
     <string name="warn_scope_whole_title">Whole package directory</string>
     <string name="warn_scope_whole_body">Once working, added, deleted or replaced files are followed automatically, with no completion and no rebuild. Bind mounting works only on some systems: it may be mounted yet unreadable. Whether it works is confirmed by reading as the target app. This scope is exclusive with other groups for the same target.</string>
     <string name="extra_mode_link">Hard link (recommended)</string>
@@ -136,7 +137,6 @@
     <string name="extra_pick_hint">Hard link: no extra space. Copy: a separate snapshot that takes extra space. Neither follows later updates to the primary app; tap Re-share to rebuild.</string>
     <string name="perm_request">Request permission</string>
     <string name="perm_granted">√ Granted</string>
-    <string name="perm_granted_module">√ Granted (boot-restore module available)</string>
     <string name="perm_locked_hint">Grant an execution permission first. Creating, editing or saving groups and generating the module are disabled until then, so nothing is configured without being able to run.</string>
     <string name="perm_restored_locked">Configuration restored. Grant permission to save and apply changes; the module button appears only after permission is granted.</string>
     <string name="perm_request_denied">Permission was not granted. Check Shizuku / Sui or your root manager, then try again.</string>
@@ -159,7 +159,7 @@
     <string name="label_target_kind">Target type</string>
     <string name="mode_hardlink_rec">Hard links (recommended)</string>
     <string name="mode_hardlink_hint">Both sides look like real files taking up space, but they point to the same data and use only one copy of storage; the two directory entries are equal, with no primary side. After the primary app updates, tap Rebuild links to save space again, or just keep using it.</string>
-    <string name="mode_mount_hint">Once working, added, deleted or replaced files inside the mounted directory are followed automatically. Success is confirmed by reading as the target app; some systems may not allow it.</string>
+    <string name="mode_mount_hint">Once working, added, deleted or replaced files inside the mounted directory are followed automatically. Success is confirmed by reading as the target app; if it cannot see them, check whether your root setup offers a global mount namespace option. If that does not help, try Hard link or Copy instead.</string>
     <string name="mode_copy_hint">Fallback only: keeps a second full copy and uses extra space. Use it only when hard links and mount both fail and you do not want the target app to download resources again. The two sides are independent and do not follow updates.</string>
     <string name="progress_title">Applying share</string>
     <string name="progress_count">%1$s commands executed</string>
@@ -193,8 +193,6 @@
     <string name="warn_cross_user_title">Cross-user mount may not take effect</string>
     <string name="save_confirm_title">Save share group</string>
     <string name="save_clear_line">Creating a group first clears the data directory of the target app, then establishes the share using %1$s.</string>
-    <string name="progress_done_title">Done</string>
-    <string name="progress_done_ok">Back to main</string>
     <string name="save_edit_line">Saving force-stops the target app first, then updates this group by the changes made; existing data in the target app is not cleared. The configuration is kept and other groups are unaffected.</string>
     <string name="err_target_same_body">The target is the same app in the same user as the primary, so it would share data with itself. Pick another client or switch to a different user.</string>
     <string name="err_target_dup_body">This app in this user is already used in another group, as primary or target, or is duplicated inside this group. One data set can belong to only one group; add targets in the existing group instead.</string>
@@ -204,11 +202,19 @@
     <string name="delete_clear_check">Also clear the target app’s directory</string>
     <string name="delete_mount_body">Delete "%1$s"? The target app’s directory will be cleared as well.</string>
     <string name="warn_shell_title">This backend may not be able to finish sharing</string>
-    <string name="warn_shell_body">Shizuku-only runs as the shell user. It cannot reach app data under /data/media/USER/, so this app retries via /storage/emulated/0/. Only Copy usually works there: the emulated SD card supports neither hard links nor mounts, and users other than 0 are out of reach. Switch back to Copy, or use root / Sui. Failures are listed one by one.</string>
-    <string name="progress_log_saved">Done. The scrolling log closes after you confirm — the full output is saved to Download/AndroidDataShare/run.log. Open it in a file manager; each run overwrites it, so only the latest is kept.</string>
+    <string name="warn_shell_body">Shizuku-only runs as the shell user. It cannot reach app data under /data/media/USER/, so this app retries via the public storage path of the primary user. Only Copy usually works there: the public storage view supports neither hard links nor mounts, and users other than 0 are out of reach. Switch back to Copy, or use root / Sui. Failures are listed one by one.</string>
+    <string name="progress_log_saved">Done. The full output is saved to Download/AndroidDataShare/run.log. Open it in a file manager; each run overwrites it, so only the latest is kept.</string>
     <string name="label_scope_link">Hard-link scope</string>
     <string name="label_scope_copy">Copy scope</string>
     <string name="scope_all_files">All files</string>
     <string name="scope_pick_items">Pick folders or files</string>
     <string name="scope_pick_hint">Pick folders or individual files; a picked folder is expanded into its files when applied.</string>
+    <string name="hardlink_unsupported_hint">This system seems to block or restrict hard links; Copy mode may be the only option.</string>
+    <string name="progress_pause">Pause</string>
+    <string name="progress_resume">Resume</string>
+    <string name="progress_cancel">Cancel run</string>
+    <string name="progress_cancel_body">This stops the run and clears everything already created in the target directory. This cannot be undone.</string>
+    <string name="progress_cancelled">Stopped. Anything already created in the target directory has been cleared.</string>
+    <string name="progress_close">Close</string>
+    <string name="progress_ctrl_failed">Could not send the pause or resume command; the run may keep going.</string>
 </resources>

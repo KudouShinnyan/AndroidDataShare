@@ -104,9 +104,7 @@ public class GroupActivity extends Activity {
         primaryApp = new Button(this);
         primaryApp.setOnClickListener(v -> Pickers.pickApp(this, g.primary.user, p -> {
             if (!p.equals(g.primary.pkg)) {
-                g.mountDirs.clear();
-                g.extraLinks.clear();
-                g.dirs.clear();
+                resetForPrimaryChange(g);
             }
             g.primary.pkg = p;
             dirty = true;
@@ -121,9 +119,7 @@ public class GroupActivity extends Activity {
                 Desync.showShellRisk(this, null);
             }
             if (!u.equals(g.primary.user)) {
-                g.mountDirs.clear();
-                g.extraLinks.clear();
-                g.dirs.clear();
+                resetForPrimaryChange(g);
             }
             g.primary.user = u;
             dirty = true;
@@ -259,6 +255,15 @@ public class GroupActivity extends Activity {
         s.groups.add(src);
         Model.State t = Model.parseState(Model.toStateJson(s));
         return t.groups.isEmpty() ? new Model.Group() : t.groups.get(0);
+    }
+
+    static void resetForPrimaryChange(Model.Group g) {
+        g.mountDirs.clear();
+        g.extraLinks.clear();
+        g.dirs.clear();
+        if (!g.isMount()) {
+            g.dirs.add(Model.WHOLE);
+        }
     }
 
     private void chooseMode() {
@@ -806,35 +811,22 @@ public class GroupActivity extends Activity {
         applying = true;
         saveButton.setEnabled(false);
         cancelButton.setEnabled(false);
-        final Progress.Handle h = Progress.attach(this, page,
-                getString(R.string.progress_title));
+        boolean controllable = Model.MODE_HARDLINK.equals(g.mode)
+                && (isNew || Session.modeChangedGids().contains(g.id));
+        final Progress.Handle h = Progress.show(this, getString(R.string.progress_title),
+                controllable, this::finish);
         new Thread(() -> {
             Backend.Result r = Actions.submitLive(this,
                     isNew ? Model.rulesForGroup(Session.get(), g.id) : "", h::step);
-            final boolean logSaved = Progress.saveLog(h.log());
-            Util.ui(this, () -> {
-                String msg = r.ok
+            Actions.markApplied(this, g.id, r, false);
+            String msg = "CANCELLED".equals(r.code) ? getString(R.string.progress_cancelled)
+                    : (r.ok
                         ? ("PARTIAL".equals(r.code)
                             ? getString(R.string.msg_rule_partial, r.message)
                             : getString(R.string.msg_applied))
-                        : getString(R.string.msg_failed, r.code + " " + r.message);
-                h.done(r.ok, msg);
-                if (r.ok) {
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.progress_done_title)
-                            .setMessage(logSaved
-                                    ? msg + "\n\n" + getString(R.string.progress_log_saved)
-                                    : msg)
-                            .setPositiveButton(R.string.progress_done_ok,
-                                    (d, w) -> finish())
-                            .setCancelable(false)
-                            .show();
-                } else {
-                    applying = false;
-                    saveButton.setEnabled(true);
-                    cancelButton.setEnabled(true);
-                }
-            });
+                        : getString(R.string.msg_failed, r.code + " " + r.message));
+            h.finish(msg);
+            Progress.saveLog(h.log());
         }).start();
     }
 

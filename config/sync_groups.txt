@@ -1,1 +1,3 @@
+# 一行写同一游戏可共用资源的一组包名，空格或逗号分隔
+# 内置那份也读，这里只作补充；分歧以内置为准
 com.miHoYo.Yuanshen com.miHoYo.GenshinImpact com.miHoYo.ys.bilibil

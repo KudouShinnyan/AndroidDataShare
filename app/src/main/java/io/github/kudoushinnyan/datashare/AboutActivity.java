@@ -29,7 +29,7 @@ public class AboutActivity extends Activity {
         sum.setText(R.string.about_summary);
         box.addView(sum);
         TextView ver = new TextView(this);
-        ver.setText(getString(R.string.about_version, "1.0 / 100"));
+        ver.setText(getString(R.string.about_version, "1.1 / 110"));
         box.addView(ver);
         box.addView(button(R.string.about_support, v -> {
             TextView d = new TextView(this);
